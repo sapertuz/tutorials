@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "/Users/chello/Documents/Git/tutorials/microROS_Zynq-uB/src/pingpong",
+      "program": "/Users/chello/Documents/Git/tutorials/microROS_Zynq-uB/src/pingpong/build/Debug/outDebug"
+    }
+  ]
+}
