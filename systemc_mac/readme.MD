@@ -19,9 +19,11 @@ This tutorial guides you through setting up a development environment for System
 **Steps:**
 
 1. **Install Docker Desktop:**
+   
    Download and install Docker Desktop for Mac from the official website.
 
 2. **Pull the x86_64 Ubuntu image:**
+   
    Open a terminal window and run the following command:
 
    ```console
@@ -29,6 +31,7 @@ This tutorial guides you through setting up a development environment for System
    ```
 
 3. **Create a Docker container:**
+   
    Run the following command to create a new container based on the Ubuntu image, naming it `systemc-dev`:
 
    ```console
@@ -39,6 +42,7 @@ This tutorial guides you through setting up a development environment for System
    This command starts the container in interactive mode (`-it`) and assigns the name `systemc-dev` and mounts the `tutorials/systemc_mac` folder onto `/systemc_dev` in the container.
 
 4. **Install development tools:**
+   
    Inside the container, update the package list and install essential tools:
 
    ```console
@@ -48,6 +52,7 @@ This tutorial guides you through setting up a development environment for System
    ```
 
 5. **Install SystemC:**
+   
    There are two options for installing SystemC:
 
    * **[Recommended for this tutorial] Using pre-built packages:**
@@ -69,6 +74,7 @@ This tutorial guides you through setting up a development environment for System
    ```
 
 7. **Run the container in detached mode:**
+   
    Use the following command to start the container in the background:
 
    ```console
@@ -76,8 +82,9 @@ This tutorial guides you through setting up a development environment for System
    ```
 
 8. **Install the Docker and Remote SSH extension for VS Code:**
+   
    Open VS Code and navigate to the Extensions tab. Search for "Docker" and install the official extension from Microsoft.
-   Do the same with for **Remote - SSH**
+   Do the same for **Remote - SSH**
 
 9. **Connect VS Code to Docker:**
    * Click the Docker icon in the VS Code activity bar.
