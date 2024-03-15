@@ -88,10 +88,10 @@ This tutorial guides you through setting up a development environment for System
 
       ![](misc/vscode-docker3.png)
 
-11. **Run the example code `main.cpp`:**
+10. **Run the example code `main.cpp`:**
    * Inside your VScode, open a terminal. It should be a terminal inside the docker container located on the `system_dev` folder. The prefix of the terminal should look something like: 
       ```console
-      root@482d5b7c1143:/systemc_dev/build# |
+      root@482d5b7c1143:/systemc_dev# |
       ```
    * use the `CMakeLists.txt` to build the example on this tutorial
 
