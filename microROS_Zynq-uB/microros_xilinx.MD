@@ -13,7 +13,8 @@ docker run -it --rm --net=host -v ${path_to_Vitis_installation}:${path_to_Vitis_
 ```
 
 Note 1: It's crucial to use the 'foxy' version for a correct build.
-Note 2: `path_to_Vitis_installation` is your Xilinx installation folder (e.g. `/tools/Xilinx/Vitis/2023.1`)
+
+Note 2: `${path_to_Vitis_installation}` is your Xilinx installation folder (e.g. `/tools/Xilinx/Vitis/2023.1`)
 
 Next, set up the micro-ROS workspace:
 
@@ -43,7 +44,7 @@ The cmake files we will use are the `zynq7000_toolchain.cmake` and `zynq7000_col
 2. In the same cmake file, make sure to replace the variable `CMAKE_SYSTEM_PROCESSOR` with the name you gave to the processor on the Vivado design (e.g.`processing_system7_0`, see next subsection)
 and copy 
 3. Copy the necessary files for Zynq and MicroBlaze devices.
-   1. First get the `docker_id` of your mounted image. You can get it with the command `docker ps`
+   1. First get the `${docker_id}` of your mounted image. You can get it with the command `docker ps`
    2. From a terminal different than the docker terminal, `cd` to the tutorial folder and copy the meta and cmake files 
 ```sh
 docker cp scripts/zynq7000_toolchain.cmake ${docker_id}:/uros_ws      
