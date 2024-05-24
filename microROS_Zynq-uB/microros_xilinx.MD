@@ -6,15 +6,14 @@ Micro-ROS is a lightweight and real-time communication middleware designed to ex
 
 ## Get Micro-ROS Base from Docker
 
-To begin, obtain the micro-ROS base system using Docker:
+To begin, cd to the folder of this repository and obtain the micro-ROS base system using Docker:
 
 ```sh
-docker run -it --rm --net=host -v ${path_to_Vitis_installation}:${path_to_Vitis_installation} microros/base:foxy
+docker run -it --rm --net=host -v $(path_to_Vitis_root):/tools/Xilinx -v -v $(pwd):/tutorials microros/base:foxy
 ```
 
 Note 1: It's crucial to use the 'foxy' version for a correct build.
-
-Note 2: `${path_to_Vitis_installation}` is your Xilinx installation folder (e.g. `/tools/Xilinx/Vitis/2023.1`)
+Note 2: `path_to_Vitis_root` is your Xilinx installation folder (e.g. `/tools/Xilinx/`)
 
 Next, set up the micro-ROS workspace:
 
@@ -36,37 +35,30 @@ Generate the micro-ROS library:
 ros2 run micro_ros_setup create_firmware_ws.sh generate_lib
 ```
 
-## Modify the provided cmake and colcon files and copy them to the docker container
+## Modify the provided cmake and colcon files
 
-The cmake files we will use are the `zynq7000_toolchain.cmake` and `zynq7000_colcon.meta` located in the `scripts` folder
+The cmake files we will use are: `zynq7000_toolchain.cmake` and `zynq7000_colcon.meta` located in the `scripts` folder
 
-1. In the cmake file, make sure to replace the variable `VITIS_PATH` with the installation folder of Vitis from your docker container's perspective (should be the same as `${path_to_Vitis_installation}`).
+1. In the cmake file, make sure to replace the variable `VITIS_PATH` with the installation folder of Vitis from your docker container's perspective (should be the something like `$(path_to_Vitis_root)/Vitis/<version>/`).
 2. In the same cmake file, make sure to replace the variable `CMAKE_SYSTEM_PROCESSOR` with the name you gave to the processor on the Vivado design (e.g.`processing_system7_0`, see next subsection)
 and copy 
-3. Copy the necessary files for Zynq and MicroBlaze devices.
-   1. First get the `${docker_id}` of your mounted image. You can get it with the command `docker ps`
-   2. From a terminal different than the docker terminal, `cd` to the tutorial folder and copy the meta and cmake files 
-```sh
-docker cp scripts/zynq7000_toolchain.cmake ${docker_id}:/uros_ws      
-docker cp scripts/zynq7000_colcon.meta ${docker_id}:/uros_ws      
-
-```
 
 ## Build the micro-ROS library and Copy static library from docker container to host PC:
 
-Go back to your docker container terminal and
+1. Go back to your docker container terminal and
 
 ```sh
-ros2 run micro_ros_setup build_firmware.sh $(pwd)/zynq7000_toolchain.cmake $(pwd)/zynq7000_colcon.meta
+ros2 run micro_ros_setup build_firmware.sh $(cmake_file) $(meta_file)
 ```
-After waiting for the build, you may encounter some `stderr` messages; you can safely ignore them.
 
-From a terminal different from the terminal of your docker container copy the library with the command
+For example, `cmake_file` would be `/tutorials/microROS_Zynq-uB/scripts/zynq7000_toolchain.cmake`, and  `meta_file` would be `/tutorials/microROS_Zynq-uB/scripts/zynq7000_toolchain.meta`
+
+2. After waiting for the build, you may encounter some `stderr` messages; you can safely ignore them.
+From the same docker terminal copy the library to the tutorial folder with the command
+
 ```sh
-docker cp -r ${docker_id}:/uros_ws/firmware/build ${your-microroslib-path} 
+cp -r /uros_ws/firmware/build /tutorials/microROS_Zynq-uB/uros_lib
 ```
-
-`${your-microroslib-path}` is whatever folder you want to save your library
 
 ## Vivado Design for Zynq and Micro-ROS Diagram
 
@@ -88,24 +80,25 @@ Follow these steps:
 2. Create a Project with the generated Platform and select and "Empty (c) Project" template.
 3. Add all the source files included on the `src` folder.
 3. Add custom .a library to the project:
-   - **Linker settings**: Project Properties &rarr; C/C++ Build / Settings &rarr; x gcc compiler &rarr; Directories &rarr; Include Paths &rarr; Add path to directory `${your-microroslib-path}/include`
+   - **Linker settings**: Project Properties &rarr; C/C++ Build / Settings &rarr; x gcc compiler &rarr; Directories &rarr; Include Paths &rarr; Add path to directory 
+      - Add `$(your-microroslib-path)/include`
    - **Linker settings**: Project Properties &rarr; C/C++ Build / Settings &rarr; x gcc linker &rarr; Libraries &rarr; Libraries 
-   - Add `microros`
+      - Add `microros`
    - **Linker settings**: Project Properties &rarr; C/C++ Build / Settings &rarr; x gcc linker &rarr; Libraries &rarr; Library search path 
-      - Add path to directory libmicroros `${your-microroslib-path}`
+      - Add path to directory libmicroros `$(your-microroslib-path)`
 
 ![vitis_1](media/vitis_uROSlib_1.png)
 ![vitis_2](media/vitis_uROSlib_2.png)
 
 Build everything.
 
-## Create Agent and Test Everything
+<!-- ## Create Agent and Test Everything
 
 Compile and flash the board with the ping-pong example.
 
-Follow steps from [micro-ROS documentation](https://micro.ros.org/docs/tutorials/core/first_application_rtos/freertos/) to run the micro-ROS app.
+Follow steps from [micro-ROS documentation](https://micro.ros.org/docs/tutorials/core/first_application_rtos/freertos/) ("Creating the micro-ROS agent" section) to run the micro-ROS app.
 
-## Running the Micro-ROS Application with Vitis and the agent
+## Running the Micro-ROS Application with Vitis and the agent -->
 
 ## Start the Micro-ROS Agent 
 
@@ -113,20 +106,19 @@ Check if the micro-ROS app is working correctly:
 
 1. Run the micro-ROS agent:
 
-   ```sh
-   ros2 run micro_ros_agent micro_ros_agent serial --dev [device] -v 6
+   ```console
+   docker run -it --rm --device=$(device) microros/micro-ros-agent:humble serial --dev $(device)
    ```
 
-   (Note: Replace `[device]` with the appropriate device name, e.g., `/dev/tty/USB1`)
+   (Note: Replace `$(device)` with the appropriate device name, e.g., `/dev/ttyUSB1`)
 
-2. Open a new command line and listen to the ping topic:
+<!-- 2. Open a new command line and listen to the ping topic:
 
    ```sh
    source /opt/ros/$ROS_DISTRO/setup.bash
    ros2 topic echo /microROS/ping
    ```
-
-   Verify that the Ping Pong node is correctly publishing pings.
+   At this point you should start/debug the Micro-ROS Application from Vitis
 
 3. Open another command line and subscribe to the pong topic:
 
@@ -137,7 +129,7 @@ Check if the micro-ROS app is working correctly:
 
    Publish a fake ping and check for the expected pong response.
 
-For now they will not show anything
+For now they will not show anything -->
 
 ## Start the Micro-ROS Application from Vitis
 

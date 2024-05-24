@@ -17,7 +17,7 @@
                 "-DRCL_COMMAND_LINE_ENABLED=OFF",
                 "-DRCL_LOGGING_ENABLED=OFF"
             ]
-        }, 
+        },
         "rcutils": {
             "cmake-args": [
                 "-DENABLE_TESTING=OFF",
@@ -35,24 +35,18 @@
                 "-DUCLIENT_PROFILE_DISCOVERY=OFF",
                 "-DUCLIENT_PROFILE_SERIAL=OFF",
                 "-UCLIENT_PROFILE_STREAM_FRAMING=ON",
-                "-DUCLIENT_PROFILE_CUSTOM_TRANSPORT=ON",
-                "-DUCLIENT_PROFILE_SHARED_MEMORY=ON"
+                "-DUCLIENT_PROFILE_CUSTOM_TRANSPORT=ON"
             ]
         },
         "rmw_microxrcedds": {
             "cmake-args": [
                 "-DRMW_UXRCE_MAX_NODES=1",
-                "-DRMW_UXRCE_MAX_PUBLISHERS=3",
-                "-DRMW_UXRCE_MAX_SUBSCRIPTIONS=3",
+                "-DRMW_UXRCE_MAX_PUBLISHERS=5",
+                "-DRMW_UXRCE_MAX_SUBSCRIPTIONS=5",
                 "-DRMW_UXRCE_MAX_SERVICES=1",
                 "-DRMW_UXRCE_MAX_CLIENTS=1",
                 "-DRMW_UXRCE_MAX_HISTORY=4",
                 "-DRMW_UXRCE_TRANSPORT=custom"
-            ]
-        },
-        "microcdr": {
-            "cmake-args": [
-                "-DUCDR_PIC=OFF"
             ]
         }
     }

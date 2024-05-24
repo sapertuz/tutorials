@@ -20,6 +20,7 @@
 #include <std_msgs/msg/int64.h>
 #include <std_msgs/msg/int32.h>
 #include <std_msgs/msg/header.h>
+#include <rosidl_runtime_c/string_functions.h>
 
 #include <stdio.h>
 #include <stdlib.h> 
@@ -39,7 +40,7 @@
 #define TIMER_CHECK_THRESHOLD	9
 /*-----------------------------------------------------------*/
 #define UART_DEVICE_ID                  XPAR_XUARTPS_0_DEVICE_ID
-#define THREAD_MIRCOROS_STACKSIZE 3000  // 12kb
+#define THREAD_UROS_STACKSIZE 1000  // 12kb
 
 #define MICROROS_TRANSPORTS_FRAMING_MODE 1
 #define MICROROS_TRANSPORTS_PACKET_MODE 0
@@ -53,18 +54,6 @@
 static void microros_thread_custom(void *pvParameters);
 const TickType_t x1second = pdMS_TO_TICKS( DELAY_1_SECOND );
 const TickType_t x10millisecond = pdMS_TO_TICKS( DELAY_10_MS );
-
-/* microRos Prototype */
-//bool vitis_transport_open(struct uxrCustomTransport * transport);
-//bool vitis_transport_close(struct uxrCustomTransport * transport);
-//size_t vitis_transport_write(struct uxrCustomTransport* transport, const uint8_t * buf, size_t len, uint8_t * err);
-//size_t vitis_transport_read(struct uxrCustomTransport* transport, uint8_t* buf, size_t len, int timeout, uint8_t* err);
-//
-//void * microros_allocate(size_t size, void * state);
-//void microros_deallocate(void * pointer, void * state);
-//void * microros_reallocate(void * pointer, size_t size, void * state);
-//void * microros_zero_allocate(size_t number_of_elements, size_t size_of_element, void * state);
-
 
 /*-----------------------------------------------------------*/
 
@@ -94,9 +83,9 @@ void ping_timer_callback(rcl_timer_t * timer, int64_t last_call_time)
 	RCLC_UNUSED(last_call_time);
 
 	if (timer != NULL) {
-
 		seq_no = rand();
-		xil_printf(outcoming_ping.frame_id.data, "%d_%d", seq_no, device_id);
+		rosidl_runtime_c__String__init(&outcoming_ping.frame_id);
+		sprintf(outcoming_ping.frame_id.data, "%d_%d", seq_no, device_id);
 		outcoming_ping.frame_id.size = strlen(outcoming_ping.frame_id.data);
 
 		// Fill the message timestamp
@@ -107,8 +96,9 @@ void ping_timer_callback(rcl_timer_t * timer, int64_t last_call_time)
 
 		// Reset the pong count and publish the ping message
 		pong_count = 0;
-		rcl_publish(&ping_publisher, (const void*)&outcoming_ping, NULL);
+		RCSOFTCHECK(rcl_publish(&ping_publisher, (const void*)&outcoming_ping, NULL));
 		// xil_printf("Ping send seq %s\n", outcoming_ping.frame_id.data);
+
 	}
 }
 
@@ -119,7 +109,7 @@ void ping_subscription_callback(const void * msgin)
 	// Dont pong my own pings
 	if(strcmp(outcoming_ping.frame_id.data, msg->frame_id.data) != 0){
 		// xil_printf("Ping received with seq %s. Answering.\n", msg->frame_id.data);
-		rcl_publish(&pong_publisher, (const void*)msg, NULL);
+		RCSOFTCHECK(rcl_publish(&pong_publisher, (const void*)msg, NULL));
 	}
 }
 
@@ -139,7 +129,7 @@ int main( void )
 {
 	xTaskCreate( microros_thread_custom,
 				 ( const char * ) "GB",
-				 THREAD_MIRCOROS_STACKSIZE,
+				 THREAD_UROS_STACKSIZE,
 				 NULL,
 				 tskIDLE_PRIORITY + 1,
 				 &xHandle );
@@ -169,16 +159,17 @@ static void microros_thread_custom( void *pvParameters )
 		vitis_transport_read);
 
 
-		// rcl_allocator_t freeRTOS_allocator = rcutils_get_zero_initialized_allocator();
-		// freeRTOS_allocator.allocate = custom_allocate;
-		// freeRTOS_allocator.deallocate = custom_deallocate;
-		// freeRTOS_allocator.reallocate = custom_reallocate;
-		// freeRTOS_allocator.zero_allocate =  custom_zero_allocate;
+		 rcl_allocator_t freeRTOS_allocator = rcutils_get_zero_initialized_allocator();
+		 freeRTOS_allocator.allocate = custom_allocate;
+		 freeRTOS_allocator.deallocate = custom_deallocate;
+		 freeRTOS_allocator.reallocate = custom_reallocate;
+		 freeRTOS_allocator.zero_allocate =  custom_zero_allocate;
 
-		// bool status = rcutils_set_default_allocator(&freeRTOS_allocator);
-		// if (!status) {
-		// 	xil_printf("Error on default allocators (line %d)\n", __LINE__);
-		// }
+		 bool status = rcutils_set_default_allocator(&freeRTOS_allocator);
+		 if (!status) {
+		 	xil_printf("Error on default allocators (line %d)\n", __LINE__);
+		 	return;
+		 }
 
 		allocator = rcl_get_default_allocator();
 
@@ -210,22 +201,6 @@ static void microros_thread_custom( void *pvParameters )
 		ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Header), "/microROS/pong");
 		RCCHECK(rclc_status);
 
-//		for(;;)
-//		{
-//			rcl_ret_t ret = rcl_publish(&publisher, &msg, NULL);
-//			if (ret != RCL_RET_OK)
-//			{
-//			  xil_printf("Error publishing (msg.data: %d)\n", msg.data);
-//			}
-//			else {
-//				xil_printf("publishing (msg.data: %d)\n", msg.data);
-//			}
-//
-//			msg.data++;
-//			vTaskDelay(x1second);
-//			//sleep(1);
-//		}
-
 		// Create and allocate the pingpong messages
 		char outcoming_ping_buffer[STRING_BUFFER_LEN];
 		outcoming_ping.frame_id.data = outcoming_ping_buffer;
@@ -241,9 +216,9 @@ static void microros_thread_custom( void *pvParameters )
 
 		device_id = rand();
 
-		// Create a 3 seconds ping timer timer,
+		// Create a 5 seconds ping timer timer,
 		rcl_timer_t timer;
-		RCCHECK(rclc_timer_init_default(&timer, &support, RCL_MS_TO_NS(1000), ping_timer_callback));
+		RCCHECK(rclc_timer_init_default(&timer, &support, RCL_MS_TO_NS(5000), ping_timer_callback));
 
 		// Create executor
 		rclc_executor_t executor;
@@ -252,12 +227,6 @@ static void microros_thread_custom( void *pvParameters )
 		RCCHECK(rclc_executor_add_subscription(&executor, &ping_subscriber, &incoming_ping, &ping_subscription_callback, ON_NEW_DATA));
 		RCCHECK(rclc_executor_add_subscription(&executor, &pong_subscriber, &incoming_pong,	&pong_subscription_callback, ON_NEW_DATA));
 
-		/*
-		uart_init(); //enable intr
-		while(1){
-			if(IFG){ print("intr recived") }
-		}
-		*/
 		while(1){
 			rclc_executor_spin_some(&executor, RCL_MS_TO_NS(1000));
 			vTaskDelay(delay);
