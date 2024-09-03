@@ -65,3 +65,9 @@ Installing new boot.scr.uimg.
 ```bash
 cat /proc/cmdline
 ```
+
+# Note 
+
+The problem with this solution is that ubuntu will only be able to use 3 cores of the kria instead of 4 (hence, less performance on the PS). 
+
+The problem is that the hardware manager needs one core to work, and currently, ubuntu has no dynamic disabling of cores while the OS is running. the solution is disabling one core so the ILA can use it for debugging... ideally, once everything is working (i.e., there is no more need to use the ILA), the bootloader should be set back to what it was.
