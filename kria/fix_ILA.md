@@ -4,9 +4,9 @@ This happens when using the kria and you also want to use the System ILA, or JTA
 
 The bug makes the system completely crash once you trigger the System ILA and run the HW application using, for example, PYNQ.
 
-I tried this solution based on [this post](https://support.xilinx.com/s/question/0D54U00005u8v4nSAA/ubuntu-2204-hangs-when-trying-to-connect-to-kv260-via-vivado-hardware-manager?language=en_US&t=1725355909975&searchQuery) and using [these instructions](https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/2363129857/Getting+Started+with+Certified+Ubuntu+22.04+LTS+for+Xilinx+Devices#%5BinlineExtension%5DChanging-the-Kernel-bootargs-Used-By-U-Boot).
+I made this tutorial based on [this post](https://support.xilinx.com/s/question/0D54U00005u8v4nSAA/ubuntu-2204-hangs-when-trying-to-connect-to-kv260-via-vivado-hardware-manager?language=en_US&t=1725355909975&searchQuery) and using [these instructions](https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/2363129857/Getting+Started+with+Certified+Ubuntu+22.04+LTS+for+Xilinx+Devices#%5BinlineExtension%5DChanging-the-Kernel-bootargs-Used-By-U-Boot).
 
-Currently, the work around this issue is by adding "cpuidle.off=1" to bootargs.Bootargs is defined in "boot.scr.uimg" file in sd card first partition. 
+Currently, the work around this issue consist in adding "cpuidle.off=1" to bootargs.Bootargs is defined in "boot.scr.uimg" file in sd card first partition. 
 
 # Solution 1: Working
 1. Extract the sd-card from the kria and mount it on your PC. `cd` to the first partition (the `system-boot` partition) and run:
