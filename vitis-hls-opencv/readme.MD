@@ -38,31 +38,46 @@
 
 5. Set up the Vitis tools via the settings64 sh script in install.
     ```bash
-    source <PATH-TO-XILINX>/Vitis/<VITIS-VERSION>/settings64.sh
+    source $MY_PATH_TO_XILINX/Vitis/$MY_VITIS_VERSION/settings64.sh
     ```
 
-6. Run the command (Note: you will need to replace the directory paths in the command with their appropriate location - `<any-output-install-directory>` and `<path-to-opencv-directory>`):
+6. Run the command (Note: you will need to replace the directory paths in the command with their appropriate location - `$MY_OPENCV_INSTALL_DIR` and `$MY_OPENCV_DIR`):
 
     ```bash
-    cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=<any-output-install-directory>/install -D WITH_V4L=ON -D OPENCV_EXTRA_MODULES_PATH=<path-to-opencv-directory>/source_contrib/modules -DBUILD_TESTS=OFF -DBUILD_ZLIB=ON -DBUILD_JPEG=ON -DWITH_JPEG=ON -DWITH_PNG=ON -DBUILD_EXAMPLES=OFF -DINSTALL_C_EXAMPLES=OFF -DINSTALL_PYTHON_EXAMPLES=OFF -DWITH_OPENEXR=OFF -DBUILD_OPENEXR=OFF -D CMAKE_CXX_COMPILER=$XILINX_HLS/tps/lnx64/gcc-6.2.0/bin/g++ ..
+    cmake -D CMAKE_BUILD_TYPE=RELEASE \
+      -D CMAKE_INSTALL_PREFIX=$MY_OPENCV_INSTALL_DIR \
+      -D OPENCV_EXTRA_MODULES_PATH=$MY_OPENCV_DIR/source_contrib/modules \
+      -DWITH_V4L=ON \
+      -DBUILD_TESTS=OFF \
+      -DBUILD_ZLIB=ON \
+      -DBUILD_JPEG=ON \
+      -DWITH_JPEG=ON \
+      -DWITH_PNG=ON \
+      -DBUILD_EXAMPLES=OFF \
+      -DINSTALL_C_EXAMPLES=OFF \
+      -DINSTALL_PYTHON_EXAMPLES=OFF \
+      -DWITH_OPENEXR=OFF \
+      -DBUILD_OPENEXR=OFF \
+      -D CMAKE_CXX_COMPILER=$XILINX_HLS/tps/lnx64/gcc-6.2.0/bin/g++ \
+      ..
     ```
 
 7. Run the command:
     ```bash
-    make all -j8
+    cmake all -j8
     make install
     ```
 
 8. Set the following env variables on the terminal when you want to open vitis:
     ```bash
-    export OPENCV_INCLUDE=/home/user/bin/opencv/install/include/opencv4
-    export OPENCV_LIB=/home/user/bin/opencv/install/lib
-    export LD_LIBRARY_PATH=/home/user/bin/opencv/install/lib:$LD_LIBRARY_PATH
+    export OPENCV_INCLUDE=$MY_OPENCV_INSTALL_DIR/include/opencv4
+    export OPENCV_LIB=$MY_OPENCV_INSTALL_DIR/lib
+    export LD_LIBRARY_PATH=$MY_OPENCV_INSTALL_DIR/lib:$LD_LIBRARY_PATH
     ```
 
     then, source and open Vitis:
     ```bash
-    source <PATH-TO-XILINX>/Vitis/<VITIS-VERSION>/settings64.sh
+    source $MY_PATH_TO_XILINX/Vitis/$MY_VITIS_VERSION/settings64.sh
     vitis
     ```
 
@@ -87,4 +102,48 @@ $ sudo apt install ./libidn11_1.33-2.2ubuntu2_amd64.deb
 ### ASM error
 ```bash
 sudo apt install gcc-multilib
+```
+
+## Bonus (Building on cross-compile aarch64 platform)
+
+If you are on Parallels Ubuntu VM on a MacOS host with Apple Silicon (aarch64) chip, you may need to create a CMake toolchain file that explicitly sets the target architecture to x86_64 and uses the Vitis HLS toolchain for both C and C++ compilation. Replace **Step 6** on the tutorial with:
+
+1. Create a file, e.g., `x86_64_toolchain.cmake`:
+```cmake
+# x86_64_toolchain.cmake
+
+set(CMAKE_SYSTEM_NAME Linux)
+set(CMAKE_SYSTEM_PROCESSOR x86_64)
+
+# Specify the cross-compiler paths
+set(CMAKE_C_COMPILER $XILINX_HLS/tps/lnx64/gcc-6.2.0/bin/gcc)
+set(CMAKE_CXX_COMPILER $XILINX_HLS/tps/lnx64/gcc-6.2.0/bin/g++)
+
+# Specify the target architecture flags
+set(CMAKE_C_FLAGS "-m64")
+set(CMAKE_CXX_FLAGS "-m64")
+
+# Specify the linker flags for x86_64
+set(CMAKE_EXE_LINKER_FLAGS "-m64")
+set(CMAKE_SHARED_LINKER_FLAGS "-m64")
+```
+
+2. Run CMake with the Toolchain File
+```bash
+cmake -D CMAKE_BUILD_TYPE=RELEASE \
+      -D CMAKE_INSTALL_PREFIX=$MY_OPENCV_INSTALL_DIR \
+      -D OPENCV_EXTRA_MODULES_PATH=$MY_OPENCV_DIR/source_contrib/modules \
+      -DWITH_V4L=ON \
+      -DBUILD_TESTS=OFF \
+      -DBUILD_ZLIB=ON \
+      -DBUILD_JPEG=ON \
+      -DWITH_JPEG=ON \
+      -DWITH_PNG=ON \
+      -DBUILD_EXAMPLES=OFF \
+      -DINSTALL_C_EXAMPLES=OFF \
+      -DINSTALL_PYTHON_EXAMPLES=OFF \
+      -DWITH_OPENEXR=OFF \
+      -DBUILD_OPENEXR=OFF \
+      -DCMAKE_TOOLCHAIN_FILE=../x86_64_toolchain.cmake \
+      ..
 ```
