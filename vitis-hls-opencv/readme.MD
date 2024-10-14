@@ -104,7 +104,9 @@ $ sudo apt install ./libidn11_1.33-2.2ubuntu2_amd64.deb
 sudo apt install gcc-multilib
 ```
 
-## Bonus (Building on cross-compile aarch64 platform)
+## Bonus: 
+
+### Building on cross-compile aarch64 platform
 
 If you are on Parallels Ubuntu VM on a MacOS host with Apple Silicon (aarch64) chip, you may need to create a CMake toolchain file that explicitly sets the target architecture to x86_64 and uses the Vitis HLS toolchain for both C and C++ compilation. Replace **Step 6** on the tutorial with:
 
@@ -145,5 +147,39 @@ cmake -D CMAKE_BUILD_TYPE=RELEASE \
       -DWITH_OPENEXR=OFF \
       -DBUILD_OPENEXR=OFF \
       -DCMAKE_TOOLCHAIN_FILE=../x86_64_toolchain.cmake \
+      ..
+```
+
+## Build only core modules for Ubuntu 24.04
+
+Due to compatibility issues with certain libraries and C++ standards on Ubuntu 24.04, you may encounter linking errors during the OpenCV build process, particularly related to the `libLerc.so` library. This workaround simplifies the build by focusing only on the core modules you need, thus reducing dependency complications.
+
+The linking issues encountered on Ubuntu 24.04 are primarily due to the updated standard library and changes in the C++ ABI (Application Binary Interface). By building only the core modules, you minimize the dependencies and avoid complications with modules that may have unresolved references or incompatibilities with newer libraries, streamlining the installation process for your specific use case.
+
+1. The environment variables should now be:
+```bash
+export LIBRARY_PATH=$VITIS_HLS/tps/lnx64/gcc-6.2.0/lib64/:/usr/lib/x86_64-linux-gnu/:$LIBRARY_PATH
+export LD_LIBRARY_PATH=$VITIS_HLS/tps/lnx64/gcc-6.2.0/lib64/libstdc++.so.6.0.22
+```
+
+2. The `cmake` command should now be
+
+```bash
+cmake -D BUILD_LIST=core,highgui,imgcodecs,imgproc,features2d,flann \
+      -D CMAKE_BUILD_TYPE=RELEASE \
+      -D CMAKE_INSTALL_PREFIX=$MY_OPENCV_INSTALL_DIR \
+      -D OPENCV_EXTRA_MODULES_PATH=$MY_OPENCV_DIR/source_contrib/modules \
+      -DWITH_V4L=ON \
+      -DBUILD_TESTS=OFF \
+      -DBUILD_ZLIB=ON \
+      -DBUILD_JPEG=ON \
+      -DWITH_JPEG=ON \
+      -DWITH_PNG=ON \
+      -DBUILD_EXAMPLES=OFF \
+      -DINSTALL_C_EXAMPLES=OFF \
+      -DINSTALL_PYTHON_EXAMPLES=OFF \
+      -DWITH_OPENEXR=OFF \
+      -DBUILD_OPENEXR=OFF \
+      -D CMAKE_CXX_COMPILER=$XILINX_HLS/tps/lnx64/gcc-6.2.0/bin/g++ \
       ..
 ```
