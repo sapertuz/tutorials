@@ -8,6 +8,45 @@ I made this tutorial based on [this post](https://support.xilinx.com/s/question/
 
 Currently, the work around this issue consist in adding "cpuidle.off=1" to bootargs.Bootargs is defined in "boot.scr.uimg" file in sd card first partition. 
 
+# Solution 1: (Preferred)
+
+You can configure U-Boot to pass these arguments automatically.  You can use the flash-kernel utility and update the bootargs in `/etc/default/flash-kernel`. Here is the how-to:
+
+1. There are two variables you can set in this file to custom the kernel command line: `LINUX_KERNEL_CMDLINE="<args added to end of default bootargs from u-boot env>"` and
+`LINUX_KERNEL_CMDLINE_DEFAULTS="<args before the default bootargs from u-boot env>"`
+
+```bash
+ubuntu@kria:~$ sudo nano /etc/default/flash-kernel
+```
+
+2. Add or modify the line that contains LINUX_KERNEL_CMDLINE:
+
+```bash
+LINUX_KERNEL_CMDLINE="cpuidle.off=1"
+```
+
+2. After updating the Linux kernel boot arguments, run the flash-kernel utility to update the bootargs passed the Linux kernel on the next reboot. 
+
+```bash
+ubuntu@kria:~$ sudo flash-kernel
+
+flash-kernel: installing version 5.XX.X-XXXX-xilinx-zynqmp
+Couldn't find DTB  on the following paths: /etc/flash-kernel/dtbs /usr/lib/linux-image-5.15.0-1031-xilinx-zynqmp /lib/firmware/5.15.0-1031-xilinx-zynqmp/device-tree/
+Generating u-boot image... done.
+Taking backup of image.fit.
+Installing new image.fit.
+Generating boot script u-boot image... done.
+Taking backup of boot.scr.uimg.
+Installing new boot.scr.uimg.
+
+```
+
+3. After reboot verify the bootargs
+```bash
+cat /proc/cmdline
+ root=LABEL=writable rootwait earlycon console=ttyPS1,115200 console=tty1 clk_ignore_unused uio_pdrv_genirq.of_id=generic-uio xilinx_tsn_ep.st_pcp=4 cma=1000M quiet splash cpuidle.off=1
+```
+
 # Solution 1: Working
 1. Extract the sd-card from the kria and mount it on your PC. `cd` to the first partition (the `system-boot` partition) and run:
 ```bash
@@ -34,37 +73,7 @@ ubuntu@kria:~$ cat /proc/cmdline
  root=LABEL=writable rootwait earlycon console=ttyPS1,115200 console=tty1 clk_ignore_unused uio_pdrv_genirq.of_id=generic-uio xilinx_tsn_ep.st_pcp=4 cpuidle.off=1 cma=1000M quiet splash
 ```
 
-# Solution 2: Doesnt work for now, but should be preferred
 
-You can configure U-Boot to pass these arguments automatically.  You can use the flash-kernel utility and update the bootargs in `/etc/default/flash-kernel`. Here is the how-to:
-
-1. There are two variables you can set in this file to custom the kernel command line: `LINUX_KERNEL_CMDLINE="<args added to end of default bootargs from u-boot env>"` and
-`LINUX_KERNEL_CMDLINE_DEFAULTS="<args before the default bootargs from u-boot env>"`
-
-```bash
-ubuntu@kria:~$ export LINUX_KERNEL_CMDLINE="cpuidle.off=1"
-```
-
-2. After updating the Linux kernel boot arguments, run the flash-kernel utility to update the bootargs passed the Linux kernel on the next reboot. 
-
-```bash
-ubuntu@kria:~$ sudo flash-kernel
-
-flash-kernel: installing version 5.15.0-1031-xilinx-zynqmp
-Couldn't find DTB  on the following paths: /etc/flash-kernel/dtbs /usr/lib/linux-image-5.15.0-1031-xilinx-zynqmp /lib/firmware/5.15.0-1031-xilinx-zynqmp/device-tree/
-Generating u-boot image... done.
-Taking backup of image.fit.
-Installing new image.fit.
-Generating boot script u-boot image... done.
-Taking backup of boot.scr.uimg.
-Installing new boot.scr.uimg.
-
-```
-
-3. After reboot verify the bootargs
-```bash
-cat /proc/cmdline
-```
 
 # Note 
 
