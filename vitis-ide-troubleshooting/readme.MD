@@ -70,10 +70,10 @@ It should now open successfully.
 ### Alternative Temporary Fix: Override LD_LIBRARY_PATH
 
 If you don’t want to modify Vitis’ installation, you can override the library path at runtime:
-    ```bash
-    export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
-    vitis -g
-    ```
+```bash
+export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+vitis -g
+```
 
 However, this needs to be done every time before launching Vitis.
 

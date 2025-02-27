@@ -1,7 +1,7 @@
 # Vitis - Compiling and Installing OpenCV to Simulate 
 
 ## IMPORTANT
-- On Ubuntu 22.04
+- So far, it only works on Ubuntu 22.04 and Vitis 2024.1 . Attempts to upgrade have fauled as of Feb 2025.
 - Based on this [Xilinx Post](https://support.xilinx.com/s/article/Vitis-Libraries-Compiling-and-Installing-OpenCV?language=en_US)
 
 ## Prerequisites:
@@ -12,6 +12,7 @@
         - **NOTE:** you may need to reopen the terminal.
         - **NOTE2:** on the step to copy the key, make sure to copy the missing key on your terminal and not the one on the tutorial.
     - Modify `<path-to-repo>/source/cmake/OpenCVMinDepVersions.cmake` and change it to your cmake version
+- Make sure you have the required codec libraries to open images and videos before building (i.e., `libpng-dev`, `libjpeg-dev`)
 
 ## Tutorial
 1. Create a directory "source" and clone opencv-4.4.0 into it.
@@ -36,12 +37,7 @@
     export LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/:$LIBRARY_PATH
     ```
 
-5. Set up the Vitis tools via the settings64 sh script in install.
-    ```bash
-    source $MY_PATH_TO_XILINX/Vitis/$MY_VITIS_VERSION/settings64.sh
-    ```
-
-6. Run the command (Note: you will need to replace the directory paths in the command with their appropriate location - `$MY_OPENCV_INSTALL_DIR` and `$MY_OPENCV_DIR`):
+5. Run the command (Note: you will need to replace the directory paths in the command with their appropriate location - `$MY_OPENCV_INSTALL_DIR` and `$MY_OPENCV_DIR`):
 
     ```bash
     cmake -D CMAKE_BUILD_TYPE=RELEASE \
@@ -58,17 +54,17 @@
       -DINSTALL_PYTHON_EXAMPLES=OFF \
       -DWITH_OPENEXR=OFF \
       -DBUILD_OPENEXR=OFF \
-      -D CMAKE_CXX_COMPILER=$XILINX_HLS/tps/lnx64/gcc-6.2.0/bin/g++ \
+      -D CMAKE_CXX_COMPILER=$MY_PATH_TO_VITIS_HLS/2024.1/tps/lnx64/gcc-6.2.0/bin/g++ \
       ..
     ```
 
-7. Run the command:
+6. Run the command:
     ```bash
     cmake all -j8
     make install
     ```
 
-8. Set the following env variables on the terminal when you want to open vitis:
+7. Set the following env variables on the terminal when you want to open vitis:
     ```bash
     export OPENCV_INCLUDE=$MY_OPENCV_INSTALL_DIR/include/opencv4
     export OPENCV_LIB=$MY_OPENCV_INSTALL_DIR/lib
@@ -77,18 +73,18 @@
 
     then, source and open Vitis:
     ```bash
-    source $MY_PATH_TO_XILINX/Vitis/$MY_VITIS_VERSION/settings64.sh
+    source $MY_PATH_TO_VITIS/2024.1/settings64.sh
     vitis
     ```
 
-9. On your Vitis project/example `hls_config.cfg` file, configure the flags to:
+8. On your Vitis project/example `hls_config.cfg` file, configure the flags to:
     ```
     tb.file_cflags=<testbench-file>.cpp,-I$OPENCV_INCLUDE
     
     csim.ldflags=-L $OPENCV_LIB -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d
     ```
 
-10. Your code should compile now :)
+9. Your code should compile now :)
 
 ## Common Issues:
 
@@ -162,24 +158,10 @@ export LIBRARY_PATH=$VITIS_HLS/tps/lnx64/gcc-6.2.0/lib64/:/usr/lib/x86_64-linux-
 export LD_LIBRARY_PATH=$VITIS_HLS/tps/lnx64/gcc-6.2.0/lib64/libstdc++.so.6.0.22
 ```
 
-2. The `cmake` command should now be
+2. The `cmake` command should also include
 
 ```bash
-cmake -D BUILD_LIST=core,highgui,imgcodecs,imgproc,features2d,flann \
-      -D CMAKE_BUILD_TYPE=RELEASE \
-      -D CMAKE_INSTALL_PREFIX=$MY_OPENCV_INSTALL_DIR \
-      -D OPENCV_EXTRA_MODULES_PATH=$MY_OPENCV_DIR/source_contrib/modules \
-      -DWITH_V4L=ON \
-      -DBUILD_TESTS=OFF \
-      -DBUILD_ZLIB=ON \
-      -DBUILD_JPEG=ON \
-      -DWITH_JPEG=ON \
-      -DWITH_PNG=ON \
-      -DBUILD_EXAMPLES=OFF \
-      -DINSTALL_C_EXAMPLES=OFF \
-      -DINSTALL_PYTHON_EXAMPLES=OFF \
-      -DWITH_OPENEXR=OFF \
-      -DBUILD_OPENEXR=OFF \
-      -D CMAKE_CXX_COMPILER=$XILINX_HLS/tps/lnx64/gcc-6.2.0/bin/g++ \
-      ..
+...
+      -D BUILD_LIST=core,highgui,imgcodecs,imgproc,features2d,flann,video \
+...
 ```
