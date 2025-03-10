@@ -22,7 +22,7 @@ ubuntu@kria:~$ sudo nano /etc/default/flash-kernel
 2. Add or modify the line that contains LINUX_KERNEL_CMDLINE:
 
 ```bash
-LINUX_KERNEL_CMDLINE="cpuidle.off=1"
+LINUX_KERNEL_CMDLINE="cpuidle.off=1,quiet splash"
 ```
 
 2. After updating the Linux kernel boot arguments, run the flash-kernel utility to update the bootargs passed the Linux kernel on the next reboot. 
