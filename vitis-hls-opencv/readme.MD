@@ -1,8 +1,8 @@
 # Vitis - Compiling and Installing OpenCV to Simulate 
 
 ## IMPORTANT
-- So far, it only works on Ubuntu 22.04 and Vitis 2024.1 . Attempts to upgrade have fauled as of Feb 2025.
-- Based on this [Xilinx Post](https://support.xilinx.com/s/article/Vitis-Libraries-Compiling-and-Installing-OpenCV?language=en_US)
+- So far, it only works on Ubuntu 22.04 and Vitis 2024.2.
+- Based on this [Xilinx Post](https://support.xilinx.com/s/article/Vitis-Libraries-Compiling-and-Installing-OpenCV?language=en_US). Here you find the instructions to build using Vitis 2024.1
 
 ## Prerequisites:
 - Vitis and XRT installed
@@ -15,24 +15,18 @@
 - Make sure you have the required codec libraries to open images and videos before building (i.e., `libpng-dev`, `libjpeg-dev`)
 
 ## Tutorial
-1. Create a directory "source" and clone opencv-4.4.0 into it.
+1. Create a directory `source` and `source_contrib` and clone opencv-4.4.0 and opencv-4.4.0-contrib into it.
     ```bash
-    git clone https://github.com/opencv/opencv --branch 4.4.0 source
-    ```
-
-2. Create a directory "source_contrib" and clone opencv-4.4.0-contrib into it.
-    ```bash
-    git clone https://github.com/opencv/opencv_contrib --branch 4.4.0 source_contrib
+    git clone https://github.com/opencv/opencv --branch 4.5.0 source
+    git clone https://github.com/opencv/opencv_contrib --branch 4.5.0 source_contrib
     ```
 
 3. cd into 'source', and create 'build' dir and cd into it.
     ```bash
-    cd source
-    mkdir build
-    cd build
+    cd source && mkdir build && cd build
     ```
 
-4. Run the command:
+4. Prepare environment:
     ```bash
     export LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/:$LIBRARY_PATH
     ```
@@ -54,7 +48,7 @@
       -DINSTALL_PYTHON_EXAMPLES=OFF \
       -DWITH_OPENEXR=OFF \
       -DBUILD_OPENEXR=OFF \
-      -D CMAKE_CXX_COMPILER=$MY_PATH_TO_VITIS_HLS/2024.1/tps/lnx64/gcc-6.2.0/bin/g++ \
+      -D CMAKE_CXX_COMPILER=/tools/Xilinx/Vitis/2024.2/tps/lnx64/gcc-9.3.0/bin/g++ \
       ..
     ```
 
@@ -80,7 +74,6 @@
 8. On your Vitis project/example `hls_config.cfg` file, configure the flags to:
     ```
     tb.file_cflags=<testbench-file>.cpp,-I$OPENCV_INCLUDE
-    
     csim.ldflags=-L $OPENCV_LIB -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d
     ```
 
